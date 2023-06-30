@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+       xmlns:ui="jakarta.faces.facelets">
+
+    <f:view contentType="text/html;charset=UTF-8" encoding="UTF-8">
+    
+    <h:head>
+    	<link rel="shortcut icon" type="image/x-icon" href="#{resource['favicon.ico']}" />
+		<link rel="manifest" type="image/x-icon" href="#{resource['time-manifest.json']}" />
+		
+		<f:facet name="first">
+			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>Employee Time Recording</title>
+	 </f:facet>
+		
+		
+        <f:facet name="middle">
+        	<h:outputScript name="jquery/jquery.min.js" target="head"/>
+        	<h:outputStylesheet name="css/body.css"/>
+        	<h:outputStylesheet name="css/growl.css"/>
+        </f:facet>
+        
+        <style>
+        	.ui-card {
+        		float: center;
+        		margin: 0;
+				  position: absolute;
+				  top: 55%;
+				  left: 50%;
+				  transform: translate(-50%, -50%);
+        	}
+        	
+        </style>
+        
+        
+    </h:head>
+    <h:body>
+        <h:form prependId="false" id="formId">
+        <p:growl id="msg" life="2000" detil="true"/>
+        
+        <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+            <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />
+        </p:confirmDialog>
+    	 
+    	 <p:confirmPopup global="true">
+            <p:commandButton value="No" type="button" styleClass="ui-confirm-popup-no ui-button-flat"/>
+            <p:commandButton value="Yes" type="button" styleClass="ui-confirm-popup-yes" />
+    	</p:confirmPopup>
+        
+	            
+	            <span class="ui-input-icon-left">
+			    	<i class="pi pi-search" />    
+					<p:inputText value="#{record.searchParam}" placeholder="Search... month:year:day or name:name" style="width: 30em" onclick="PF('panelWgr').hide(1000)">
+						<p:ajax event="keyup" listener="#{record.loadSearch}" update="dataId" delay="800"/>
+					</p:inputText>
+					<p:selectOneMenu id="monthId" value="#{record.monthId}" style="width: 12em">
+				    		<f:selectItem itemLabel="Generate Month late" />
+							<f:selectItems value="#{record.months}"/>
+							<p:ajax event="change" listener="#{record.loadLateMonth}" update="dataId"/>
+					</p:selectOneMenu>
+				</span>
+				
+				<p:dataTable id="dataId" value="#{record.timeData}" var="rt" stickyHeader="false"
+							rows="10" paginator="true" paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {Exporters}"
+                         rowsPerPageTemplate="5,10,15,20,50,100"
+                         scrollable="false"  paginatorPosition="top" paginatorAlwaysVisible="true" reflow="true" lazy="false"
+							>
+							
+							<f:facet name="{Exporters}">
+					       		<p:commandButton value="XLS" styleClass="mr-2 mb-2 ui-button-outlined">
+				                    <p:dataExporter type="xls" target="dataId" fileName="attendance"/>
+				                </p:commandButton>
+					       </f:facet>
+							
+							<p:column headerText="Date" width="50">
+            						<p:outputLabel value="#{rt.date}"/>
+            				</p:column>
+            				
+            				<p:column headerText="Employee" width="150">
+            						<p:outputLabel value="#{rt.employeeName}"/>
+            				</p:column>
+            				
+            				<p:column headerText="AM IN" width="80" exportable="false">
+            					<div class="ui-inputgroup">
+            						<p:commandButton value="#{record.convertTime(rt.time1)}" rendered="#{not empty rt.time1}" style="width: 70px" actionListener="#{record.timeDetails(rt.data1)}" update="photo"/>
+            						<p:commandButton icon="pi pi-trash" actionListener="#{record.deleteTime(rt.data1)}" update="dataId msg" style="width: 20px" rendered="#{not empty rt.time1}">
+            							<p:confirm type="popup" header="Confirmation" message="Are you sure you want to delete?." icon="ui-icon-alert" />
+            						</p:commandButton>
+            					</div>	
+            				</p:column>
+            				
+            				<p:column headerText="AM OUT" width="80" exportable="false">
+            					<div class="ui-inputgroup">
+            						<p:commandButton value="#{record.convertTime(rt.time2)}"  rendered="#{not empty rt.time2}" style="width: 70px" actionListener="#{record.timeDetails(rt.data2)}" update="photo"/>
+            						<p:commandButton icon="pi pi-trash" actionListener="#{record.deleteTime(rt.data2)}" update="dataId msg" style="width: 20px" rendered="#{not empty rt.time2}">
+            							<p:confirm type="popup" header="Confirmation" message="Are you sure you want to delete?." icon="ui-icon-alert" />
+            						</p:commandButton>
+            					</div>	
+            				</p:column>
+            				
+            				<p:column headerText="PM IN" width="80" exportable="false">
+            					<div class="ui-inputgroup">
+            						<p:commandButton value="#{record.convertTime(rt.time3)}"  rendered="#{not empty rt.time3}" style="width: 80px" actionListener="#{record.timeDetails(rt.data3)}" update="photo"/>
+            						<p:commandButton icon="pi pi-trash" actionListener="#{record.deleteTime(rt.data3)}" update="dataId msg" style="width: 20px" rendered="#{not empty rt.time3}">
+            							<p:confirm type="popup" header="Confirmation" message="Are you sure you want to delete?." icon="ui-icon-alert" />
+            						</p:commandButton>
+            					</div>	
+            				</p:column>
+            				
+            				<p:column headerText="PM OUT" width="80" exportable="false">
+            					<div class="ui-inputgroup">
+            						<p:commandButton value="#{record.convertTime(rt.time4)}"  rendered="#{not empty rt.time4}" style="width: 80px" actionListener="#{record.timeDetails(rt.data4)}" update="photo"/>
+            						<p:commandButton icon="pi pi-trash" actionListener="#{record.deleteTime(rt.data4)}" update="dataId msg" style="width: 20px" rendered="#{not empty rt.time4}">
+            							<p:confirm type="popup" header="Confirmation" message="Are you sure you want to delete?." icon="ui-icon-alert" />
+            						</p:commandButton>
+            					</div>	
+            				</p:column>
+            				
+            				<p:column headerText="OT START" width="80" exportable="false">
+            					<div class="ui-inputgroup">
+            						<p:commandButton value="#{record.convertTime(rt.time5)}"  rendered="#{not empty rt.time5}" style="width: 80px" actionListener="#{record.timeDetails(rt.data5)}" update="photo"/>
+            						<p:commandButton icon="pi pi-trash" actionListener="#{record.deleteTime(rt.data5)}" update="dataId msg" style="width: 20px" rendered="#{not empty rt.time5}">
+            							<p:confirm type="popup" header="Confirmation" message="Are you sure you want to delete?." icon="ui-icon-alert" />
+            						</p:commandButton>
+            					</div>	
+            				</p:column>
+            				
+            				<p:column headerText="OT END" width="80" exportable="false">
+            					<div class="ui-inputgroup">
+            						<p:commandButton value="#{record.convertTime(rt.time6)}"  rendered="#{not empty rt.time6}" style="width: 70px" actionListener="#{record.timeDetails(rt.data6)}" update="photo"/>
+            						<p:commandButton icon="pi pi-trash" actionListener="#{record.deleteTime(rt.data6)}" update="dataId msg" style="width: 20px" rendered="#{not empty rt.time6}">
+            							<p:confirm type="popup" header="Confirmation" message="Are you sure you want to delete?." icon="ui-icon-alert" />
+            						</p:commandButton>
+            					</div>	
+            				</p:column>
+            				
+            				<p:column headerText="Late" width="30">
+            						<p:outputLabel value="#{rt.late}"/>
+            				</p:column>
+            				
+            				<p:column headerText="Late Charge" width="70">
+            						<p:outputLabel value="#{rt.lateCharge}"/>
+            				</p:column>
+            				
+            				<p:column headerText="Morning" width="50">
+            						<p:outputLabel value="#{rt.morningTotalTime}"/>
+            				</p:column>
+            				
+            				<p:column headerText="Afternoon" width="50">
+            						<p:outputLabel value="#{rt.afternoonTotalTime}"/>
+            				</p:column>
+            				
+            				<p:column headerText="Overtime" width="50">
+            						<p:outputLabel value="#{rt.totalOt}"/>
+            				</p:column>
+            				
+            				<p:column headerText="Rendered" width="50">
+            						<p:outputLabel value="#{rt.totalRenderedTime}"/>
+            				</p:column>
+            				
+				</p:dataTable>
+			
+				<p:dialog id="idTimeRec" width="400" height="600" position="right center" widgetVar="panelWgr" showHeader="true" resizable="false" closeOnEscape="true" closable="true">
+					<p:panelGrid id="photo" columns="1" layout="grid">
+							<p:graphicImage name="time/images/photocam/#{record.timeSelected.photoid}" width="320" height="240" rendered="#{not empty record.timeSelected.photoid}"/>
+							<p:selectOneMenu id="dateId" value="#{record.timeChange}" style="width: 15em;" filter="true" filterMatchMode="contains">
+				                	<f:selectItems value="#{record.timeList}"/>
+				            </p:selectOneMenu>
+				            <p:commandButton value="Save" actionListener="#{record.saveDate}" update="dataId" onclick="PF('panelWgr').hide(1000)"/>
+					
+					
+					</p:panelGrid>
+				</p:dialog>
+				
+					<ui:include src="loader.xhtml" />	
+        </h:form>
+    </h:body>
+    </f:view>
+</html>

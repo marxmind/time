@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <f:view contentType="text/html;charset=UTF-8" encoding="UTF-8">
+    
+    <h:head>
+    	<link rel="shortcut icon" type="image/x-icon" href="#{resource['favicon.ico']}" />
+		<link rel="manifest" type="image/x-icon" href="#{resource['time-manifest.json']}" />
+        <title>Employee Time Recording</title>
+        
+        <f:facet name="middle">
+        	<h:outputScript name="jquery/jquery.min.js" target="head"/>
+        	<h:outputStylesheet name="css/growl.css"/>
+        </f:facet>
+        
+        <style>
+        	.ui-card {
+        		float: center;
+        		margin: 0;
+				  position: absolute;
+				  top: 50%;
+				  left: 50%;
+				  transform: translate(-50%, -50%);
+        	}
+        	
+        	/*https://www.geeksforgeeks.org/create-scanning-animation-loader-using-html-css/*/
+        	.scan {
+			    width: 10em;
+			    text-align: center;
+			    padding: 6px 2px;
+			    position: fixed;
+			    left: 0%;
+			    right: 0%;
+			    top: 50%;
+			    margin: auto;
+			    transform: translate(-50%);
+			}
+  
+				.scan::after {
+				    content: '';
+				    background: rgb(23, 162, 74);
+				    width: 10em;
+				    height: 0.25em;
+				    display: block;
+				    position: absolute;
+				    top: 0;
+				    right: 0;
+				    left: 0;
+				    bottom: 0;
+				    margin: auto;
+				    opacity: 7;
+				    z-index: 2;
+				    animation: 10s infinite ease-in-out roll;
+				}
+				  
+				.scan img {
+				    height: 50px;
+				    width: 98%;
+				}
+				  
+				@keyframes roll {
+				    0% {
+				        transform: translateY(-100px);
+				    }
+				    50% {
+				        transform: translateY(100px);
+				    }
+				    100% {
+				        transform: translateY(-100px);
+				    }
+				}
+				
+				
+				
+        
+        </style>
+        
+    </h:head>
+    <h:body style="background-color: black">
+        <h:form >
+        <p:growl id="msg" life="2000" showDetail="true"/>
+        
+        <p:focus context="panel"/>	
+	            <p:card style="width: 50em; float: right">
+				    <f:facet name="header">
+				        
+				    </f:facet>
+				    <f:facet name="title">
+				        
+				        
+				        <h:panelGrid id="panel" columns="3">
+		            	
+		                <p:inputText tabindex="0" id="idTime" value="#{main.fingerPrintData}" accesskey="idTime" placeholder="Ready to scan..." style="width: 10em; height: 100px; font-size: 70px; font-weight: bold; color: red"/>
+		                
+		                <p:commandButton id="subId" actionListener="#{main.submitTime}" icon="pi pi-clock" onclick="PF('pc').capture()" update="idMsg idTime queDataId nameId inId msg"/>
+		                <p:commandButton icon="pi pi-list" onclick="PF('panelCheck').show()" update="idChkTime" title="Show Time log"/>
+		                
+		                </h:panelGrid>
+				        
+				    </f:facet>
+				    <f:facet name="subtitle">
+				        Please scan your ID in TEKLEAD scanner in order to record your time
+				        <p:outputLabel id="idMsg" value="#{main.message}" style="color: red"/>
+				    </f:facet>
+				
+				    <div class="ui-fluid">
+				    		
+		            		<p:outputLabel id="nameId" value="Name: #{main.fullName}" style="font-weight: bold; color: blue; font-size: 30px"/>
+							<p:dataTable id="queDataId" value="#{main.timeRcs}" var="cli" stickyHeader="false" 
+                         	 style="text-align: left" reflow="true">
+                         
+                         	<p:column headerText="AM/PM" width="30" style="text-align: left">
+            						<p:outputLabel value="#{cli.inOutTypeName}"/>
+            				</p:column>
+							<p:column headerText="Time" width="10" style="text-align: left">
+            						<p:outputLabel value="#{main.convertTime(cli.timeRecord)}"/>
+            				</p:column>
+            				
+           					</p:dataTable>
+							
+							<p:panelGrid id="inId" layout="grid" columns="1" style="text-align: left" styleClass="ui-noborder">
+							
+							<p:outputLabel id="morningId" value="Morning Total Time: #{main.morningTotalTime}" style="font-weight: bold"/>
+							<p:outputLabel id="afternoonId" value="Afternoon Total Time: #{main.afternoonTotalTime}" style="font-weight: bold"/>
+							<p:outputLabel id="totalId" value="Rendered Work: #{main.renderedTotalTime}" style="font-weight: bold"/>
+							
+							<p:outputLabel value="Late: #{main.late}" style="font-weight: bold"/>
+							<p:outputLabel value="Late Charge Php: #{main.totalLateCost}" style="font-weight: bold; color: red"/>
+							
+							
+							
+							</p:panelGrid>
+		                
+					</div>
+					
+				    <f:facet name="footer">
+				        
+				        
+				    </f:facet>
+				</p:card>
+			
+				
+						<div class="scan" style="float: left; position: relative;left: 10%;">
+							<p:graphicImage name="img/finger.png" style="width: 100%; height: 100%;"  />
+						</div>
+						
+						<p:dialog width="400" height="370" position="right bottom" widgetVar="varCam" showHeader="false" resizable="false" closeOnEscape="false" closable="false" visible="true">
+							<p:photoCam widgetVar="pc" listener="#{main.oncapture}" width="350" height="370" photoWidth="150" photoHeight="150" jpegQuality="90"/>
+						</p:dialog>
+						
+						
+					
+					<p:dialog id="idTimeCheck" width="400" height="600" visible="false" position="right center" widgetVar="panelCheck" showHeader="false" resizable="false" closeOnEscape="true" closable="true">
+							<div class="ui-inputgroup">
+								<p:inputText tabindex="1" id="idChkTime" value="#{main.timeVal}" placeholder="Input your passcode to check your time" style="width: 19em" onclick="PF('panelWgr').hide(1000)">
+									<p:ajax event="keyup" listener="#{main.checkTime}" update="chkDataId msg" delay="800"/>
+								</p:inputText>
+			                	<p:commandButton actionListener="#{main.checkTime}" icon="pi pi-clock" update="chkDataId msg"/>
+		               		</div>
+		               		
+							<p:dataTable id="chkDataId" value="#{main.timeChecks}" var="ti" stickyHeader="false" 
+                         	 style="text-align: left" reflow="true">
+                         
+                         	<p:column headerText="AM/PM" width="30" style="text-align: left">
+            						<p:outputLabel value="#{ti.inOutTypeName}"/>
+            				</p:column>
+							<p:column headerText="Time" width="10" style="text-align: left">
+            						<p:outputLabel value="#{main.convertTime(ti.timeRecord)}"/>
+            				</p:column>
+            				
+           					</p:dataTable>
+							<p:commandButton type="button" value="Close" onclick="PF('panelCheck').hide(1000);PF('idTime').show()"/>
+					</p:dialog>
+				
+					
+					
+          	<p:defaultCommand target="#{main.keyPress}"/>
+        </h:form>
+    </h:body>
+    </f:view>
+</html>

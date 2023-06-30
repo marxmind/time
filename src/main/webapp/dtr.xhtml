@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui = "http://java.sun.com/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <f:view contentType="text/html;charset=UTF-8" encoding="UTF-8">
+    
+    <h:head>
+    	<link rel="shortcut icon" type="image/x-icon" href="#{resource['favicon.ico']}" />
+		<link rel="manifest" type="image/x-icon" href="#{resource['time-manifest.json']}" />
+		
+		<f:facet name="first">
+			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>Employee DTR Generation</title>
+	 </f:facet>
+		
+		
+        <f:facet name="middle">
+        	<h:outputScript name="jquery/jquery.min.js" target="head"/>
+        	<h:outputStylesheet name="css/body.css"/>
+        </f:facet>
+        
+        <style>
+        	.ui-card {
+        		float: center;
+        		margin: 0;
+				  position: absolute;
+				  top: 55%;
+				  left: 50%;
+				  transform: translate(-50%, -50%);
+        	}
+        	
+        </style>
+        
+        
+    </h:head>
+    <h:body>
+        <h:form prependId="false" id="formId">
+        <p:growl id="msg" life="2000" detil="true"/>
+        
+        <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+            <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />
+        </p:confirmDialog>
+        
+        <p:confirmPopup global="true">
+            <p:commandButton value="No" type="button" styleClass="ui-confirm-popup-no ui-button-flat"/>
+            <p:commandButton value="Yes" type="button" styleClass="ui-confirm-popup-yes" />
+    	 </p:confirmPopup>
+        
+        			<div id="panelHide2" style="display: display">	
+        			<p:toolbar id="mainTool">
+        				<f:facet name="left">
+        				<span class="ui-input-icon-left">
+					    	<i class="pi pi-search" />    
+							
+						</span>
+        				</f:facet>
+        		
+						<f:facet name="right">
+							<p:commandButton value="Clear" update="fieldId" icon="pi pi-file" actionListener="#{dtr.defaultValue}"/>
+							
+						</f:facet>
+						<f:facet name="right"/>
+					</p:toolbar>
+        			
+        			<p:panelGrid id="fieldId" columns="4" layout="grid">
+        			
+        			<p:outputLabel value="Year"/>	
+				    <p:selectOneMenu id="yearId" value="#{dtr.year}" style="width: 12em">
+							<f:selectItems value="#{dtr.years}"/>
+					</p:selectOneMenu>
+					
+					<p:outputLabel value="Month"/>	
+				    <p:selectOneMenu id="monthId" value="#{dtr.monthId}" style="width: 12em">
+				    		<f:selectItem itemLabel="Please select" />
+							<f:selectItems value="#{dtr.months}"/>
+							<p:ajax event="change" listener="#{dtr.loadDates}" update="holId bzId eidId"/>
+					</p:selectOneMenu>
+					
+					<p:outputLabel value="Holidays"/>
+					<p:selectCheckboxMenu id="holId" value="#{dtr.selectedHoliday}" label="Select Holiday" updateLabel="true" filterMatchMode="contains" filter="true" style="width: 12em">
+						<f:selectItems value="#{dtr.holidays}" update="eidId"/>
+					</p:selectCheckboxMenu>
+					
+					<p:outputLabel value="Official Business"/>
+					<p:selectCheckboxMenu id="bzId" value="#{dtr.selectedBz}" label="Select OB" updateLabel="true" filterMatchMode="contains" filter="true" style="width: 12em">
+						<f:selectItems value="#{dtr.officialBzs}" update="eidId"/>
+					</p:selectCheckboxMenu>
+					
+					<p:outputLabel value="Employee"/>	
+				    <p:selectOneMenu id="eidId" value="#{dtr.employeeId}" filterMatchMode="contains" filter="true" style="width: 12em">
+							<f:selectItems value="#{dtr.employees}"/>
+							<p:ajax event="change" listener="#{dtr.showDtr}" update="pdfid msg"/>
+					</p:selectOneMenu>
+					
+					<p:outputLabel value="Approver"/>
+					<p:inputText value="#{dtr.adminPerson}" placeholder="In-Charge" style="width: 12em"/>
+        			
+        			
+        			</p:panelGrid>
+        			</div>
+        			
+        			<div id="panelHidePdf" style="display: none">	
+						
+						<p:toolbar id="tbPdf">
+			    		<f:facet name="left">	
+							<p:commandButton value="Close" onclick="hidePdf()" update="formId"/>    
+			    		</f:facet>
+			    		<f:facet name="right"/>
+						</p:toolbar> 
+					 	<p:media id="pdfid" value="#{dtr.tempPdfFile}" cache="false" player="pdf" width="1000" height="700">
+					 		<f:param name="id" value="#{dtr.generateRandomIdForNotCaching()}" />
+					 	</p:media>
+						
+					</div>
+				
+				
+				<script>
+					
+				function hideOnlyPdf(){
+					$("#panelHidePdf").hide(1000);
+					$("#panelHide2").show(1000);
+				}	
+				
+				 function hidePdf(){
+					 $("#panelHidePdf").hide(1000);
+					 $("#panelHide").hide(1000);
+					 $("#panelHide2").show(1000);
+				 }
+				 
+				 function showPdf(){
+					 $("#panelHidePdf").show(1000);
+					 $("#panelHide").hide(1000);
+					 $("#panelHide2").hide(1000);
+				 }
+				
+				</script>
+				
+				
+		<ui:include src="loader.xhtml" />	
+        </h:form>
+    </h:body>
+    </f:view>
+</html>

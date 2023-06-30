@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui = "http://java.sun.com/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <f:view contentType="text/html;charset=UTF-8" encoding="UTF-8">
+    
+    <h:head>
+    	<link rel="shortcut icon" type="image/x-icon" href="#{resource['favicon.ico']}" />
+		<link rel="manifest" type="image/x-icon" href="#{resource['time-manifest.json']}" />
+		
+		<f:facet name="first">
+			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>Pass Slip Approving</title>
+	 </f:facet>
+		
+		
+        <f:facet name="middle">
+        	<h:outputScript name="jquery/jquery.min.js" target="head"/>
+        	<h:outputStylesheet name="css/body.css"/>
+        </f:facet>
+        
+        <style>
+        	.ui-card {
+        		float: center;
+        		margin: 0;
+				  position: absolute;
+				  top: 55%;
+				  left: 50%;
+				  transform: translate(-50%, -50%);
+        	}
+        	
+        </style>
+        
+        
+    </h:head>
+    <h:body>
+        <h:form prependId="false" id="formId">
+        <p:growl id="msg" life="2000" detil="true"/>
+        
+        <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+            <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />
+        </p:confirmDialog>
+        
+        <p:confirmPopup global="true">
+            <p:commandButton value="No" type="button" styleClass="ui-confirm-popup-no ui-button-flat"/>
+            <p:commandButton value="Yes" type="button" styleClass="ui-confirm-popup-yes" />
+     </p:confirmPopup>
+        
+        		
+        		<p:toolbar id="mainTool">
+        				<f:facet name="left">
+        				<span class="ui-input-icon-left">
+					    	<i class="pi pi-search" />    
+							<p:inputText value="#{slipa.searchParam}" placeholder="Search..." style="width: 30em">
+								<p:ajax event="keyup" listener="#{slipa.search}" update="dataId" delay="800"/>
+							</p:inputText>
+						</span>
+        				</f:facet>
+					</p:toolbar>
+        		
+				<p:dataTable id="dataId" value="#{slipa.slips}" var="rt" stickyHeader="false"
+							rows="10" paginator="true" paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {Exporters}"
+                         rowsPerPageTemplate="5,10,15,20,50,100"
+                         scrollable="false"  paginatorPosition="top" paginatorAlwaysVisible="true" reflow="true" lazy="false"
+							>
+							
+							<f:facet name="{Exporters}">
+					       		<p:commandButton value="XLS" styleClass="mr-2 mb-2 ui-button-outlined">
+				                    <p:dataExporter type="xls" target="dataId" fileName="attendance"/>
+				                </p:commandButton>
+					       </f:facet>
+					       
+							<p:column headerText="Action" width="120" exportable="false">
+								<p:commandButton value="Approved" actionListener="#{slipa.commandAction(rt,'APPROVED')}" update="dataId msg">
+									<p:confirm type="popup" header="Confirmation" message="Are you sure you want to approved this reques?" icon="pi pi-exclamation-triangle" />
+								</p:commandButton>
+								<p:commandButton value="DENIED" actionListener="#{slipa.commandAction(rt,'DENIED')}" update="dataId msg">
+									<p:confirm type="popup" header="Confirmation" message="Are you sure you want to denied this reques?" icon="pi pi-exclamation-triangle" />
+								</p:commandButton>
+							</p:column>
+							
+							<p:column headerText="Requested" width="50">
+            						<p:outputLabel value="#{rt.dateTrans}"/>
+            				</p:column>
+            				
+            				<p:column headerText="Status" width="50">
+            						<p:outputLabel value="#{rt.statusName}"/>
+            				</p:column>
+            				
+            				<p:column headerText="Employee" width="150">
+            						<p:outputLabel value="#{rt.employee.fullName}"/>
+            				</p:column>
+            				
+            				<p:column headerText="Permission From" width="50">
+            						<p:outputLabel value="#{rt.permisionFrom}"/>
+            				</p:column>
+            				
+            				<p:column headerText="Permission To" width="50">
+            						<p:outputLabel value="#{rt.permisionTo}"/>
+            				</p:column>
+            				
+            				<p:column headerText="Reason" width="50">
+            						<p:outputLabel value="#{rt.reason}"/>
+            				</p:column>
+            				
+            				<p:column headerText="Approved By" width="50">
+            						<p:outputLabel value="#{rt.approvedBy}"/>
+            				</p:column>
+            				
+				</p:dataTable>
+			
+				
+					<ui:include src="loader.xhtml" />	
+        </h:form>
+    </h:body>
+    </f:view>
+</html>

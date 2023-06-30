@@ -1,0 +1,22 @@
+{
+  "short_name": "ETR",
+  "name": "ETR (MARXMIND IT SOLUTIONS) email at itsmarxmind@gmail.com or contact Mark Italia @09175121252",
+  "description": "Employee Time Recording",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "favicon.ico",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "localhost:8081/time",
+  "background_color": "#3367D6",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#3367D6"
+}
